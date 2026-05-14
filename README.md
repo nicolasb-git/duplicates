@@ -21,11 +21,17 @@ A powerful Python utility to find and group duplicate or near-duplicate images i
 
 ## 📖 Usage
 
-Run the script by providing the path to your image directory:
-
+### Option 1: Direct Python
 ```bash
-python3 main.py /path/to/your/images
+python3 main.py [directory]
 ```
+
+### Option 2: MacOS Script (Convenience)
+```bash
+img-dedup [directory] --threshold 10
+```
+
+*If no directory is provided, it defaults to the current directory (`.`)*
 
 ### Options
 

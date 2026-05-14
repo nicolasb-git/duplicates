@@ -18,18 +18,21 @@ class ImageDuplicateDetector:
 
     def find_images(self, directory: str, recursive: bool = True) -> List[Path]:
         """
-        Finds all supported image files in the given directory.
+        Finds all supported image files in the given directory (case-insensitive).
         """
-        path = Path(directory)
+        root = Path(directory)
         images = []
         
-        patterns = ["*" + ext for ext in self.SUPPORTED_EXTENSIONS]
+        # Walk through files and filter by lowercase extension
+        all_files = root.rglob("*") if recursive else root.glob("*")
         
-        for pattern in patterns:
-            if recursive:
-                images.extend(path.rglob(pattern))
-            else:
-                images.extend(path.glob(pattern))
+        for p in all_files:
+            try:
+                if p.is_file() and p.suffix.lower() in self.SUPPORTED_EXTENSIONS:
+                    images.append(p)
+            except Exception:
+                # Handle potential permission errors or broken symlinks
+                continue
                 
         return sorted(list(set(images)))
 

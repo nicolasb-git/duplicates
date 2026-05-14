@@ -8,7 +8,7 @@ from detector import ImageDuplicateDetector
 
 def main():
     parser = argparse.ArgumentParser(description="Detect duplicate images in a folder.")
-    parser.add_argument("directory", type=str, help="Directory to scan for duplicates.")
+    parser.add_argument("directory", type=str, nargs='?', default=".", help="Directory to scan for duplicates (default: current directory).")
     parser.add_argument("--threshold", type=int, default=10, help="Similarity threshold (lower is more strict). Default: 10")
     parser.add_argument("--recursive", action="store_true", help="Scan subdirectories recursively.")
     
@@ -69,7 +69,7 @@ def main():
             
             table.add_row(
                 str(i) if j == 0 else "",
-                str(path),
+                str(path.absolute()),
                 f"{size_kb:.1f}",
                 sim_str
             )
