@@ -2,8 +2,17 @@ import os
 from pathlib import Path
 from PIL import Image
 import imagehash
-from collections import defaultdict
 from typing import List, Dict, Set, Tuple, Optional, Callable
+import concurrent.futures
+
+def _compute_single_hash(path: Path) -> Tuple[Path, Optional[imagehash.ImageHash]]:
+    """Helper function for multiprocessing hashing."""
+    try:
+        with Image.open(path) as img:
+            h = imagehash.phash(img)
+            return path, h
+    except Exception:
+        return path, None
 
 class ImageDuplicateDetector:
     """
@@ -38,20 +47,19 @@ class ImageDuplicateDetector:
 
     def compute_hashes(self, images: List[Path], progress_callback: Optional[Callable[[int, int], None]] = None):
         """
-        Computes phash for each image.
+        Computes phash for each image using multiprocessing.
         """
         total = len(images)
-        for i, path in enumerate(images):
-            try:
-                with Image.open(path) as img:
-                    h = imagehash.phash(img)
-                    self.hashes[path] = h
-            except Exception as e:
-                # Skip unreadable images
-                pass
+        with concurrent.futures.ProcessPoolExecutor() as executor:
+            futures = [executor.submit(_compute_single_hash, path) for path in images]
             
-            if progress_callback:
-                progress_callback(i + 1, total)
+            for i, future in enumerate(concurrent.futures.as_completed(futures)):
+                path, h = future.result()
+                if h:
+                    self.hashes[path] = h
+                
+                if progress_callback:
+                    progress_callback(i + 1, total)
 
     def group_duplicates(self) -> List[List[Tuple[Path, int]]]:
         """
