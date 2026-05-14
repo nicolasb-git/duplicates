@@ -28,11 +28,14 @@ python3 main.py [directory]
 ```
 
 ### Option 2: MacOS Script (Convenience)
-I have included a shell script `img-dedup` that allows you to run the tool from anywhere.
+I have included a shell script `img-dedup` that allows you to run the tool from anywhere. 
+
+**Note:** The script automatically resolves its own location, even when called via a **symlink**. You only need to manually edit the `SOURCE_DIR` variable (line 4) if you move the script file *without* using a symlink.
 
 1. **Make it globally accessible**:
    ```bash
-   sudo ln -s "/Users/kaerith/workspace/duplicates/img-dedup" /usr/local/bin/img-dedup
+   # Use the absolute path to where you cloned the repo
+   sudo ln -s "/path/to/your/cloned/repo/img-dedup" /usr/local/bin/img-dedup
    ```
 
 2. **Run it from anywhere**:
