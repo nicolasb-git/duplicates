@@ -1,15 +1,16 @@
 # Image Duplicate Detector
 
-A powerful Python utility to find and group duplicate or near-duplicate images in a folder using perceptual hashing (`pHash`). It can identify images that have been resized, compressed, or converted to different formats.
+A high-performance Python utility to find and group duplicate or near-duplicate images in a folder using perceptual hashing (`pHash`). It can identify images that have been resized, compressed, or converted to different formats.
 
-## 🚀 Features
+## 🚀 Key Features
 
-- **Perceptual Hashing**: Uses structural analysis to find similar images, not just exact byte-for-byte duplicates.
+- **High Performance**: Uses **Multiprocessing** to utilize all available CPU cores for lightning-fast scanning.
+- **Exact-Match Fast Path**: Uses **MD5 hashing** to instantly identify byte-for-byte identical files, skipping expensive image processing for known duplicates.
 - **Smart Grouping**: Groups related images together and identifies a "Reference" version.
 - **Similarity Scores**: Shows a percentage score for how closely a duplicate matches the reference.
-- **Rich UI**: Beautiful terminal output with progress bars and formatted tables.
-- **Fast Scanning**: Efficiently processes large directories with recursive support.
-- **Wide Format Support**: Works with `.jpg`, `.jpeg`, `.png`, `.webp`, `.bmp`, and `.tiff`.
+- **Wide Format Support**: Works with `.jpg`, `.jpeg`, `.png`, `.webp`, `.bmp`, `.tiff`, and **.heic** (iPhone photos).
+- **Case Insensitive**: Automatically finds images regardless of extension case (e.g., `.jpg`, `.JPG`, `.jPeG`).
+- **Terminal Friendly**: Outputs absolute paths that are **clickable links** in most modern terminals.
 
 ## 🛠️ Installation
 
@@ -27,11 +28,19 @@ python3 main.py [directory]
 ```
 
 ### Option 2: MacOS Script (Convenience)
-```bash
-img-dedup [directory] --threshold 10
-```
+I have included a shell script `img-dedup` that allows you to run the tool from anywhere.
 
-*If no directory is provided, it defaults to the current directory (`.`)*
+1. **Make it globally accessible**:
+   ```bash
+   sudo ln -s "/Users/kaerith/workspace/duplicates/img-dedup" /usr/local/bin/img-dedup
+   ```
+
+2. **Run it from anywhere**:
+   ```bash
+   img-dedup [directory] --threshold 10 --recursive
+   ```
+
+*Note: If no directory is provided, it defaults to the current directory (`.`)*
 
 ### Options
 
@@ -40,31 +49,20 @@ img-dedup [directory] --threshold 10
 | `--threshold` | Sensitivity of the detection (lower is stricter) | `10` |
 | `--recursive` | Scan subdirectories | `False` |
 
-### Examples
-
-**Strict detection (Exact duplicates):**
-```bash
-python3 main.py ./photos --threshold 2
-```
-
-**Loose detection (Find similar photos/burst shots):**
-```bash
-python3 main.py ./photos --threshold 15 --recursive
-```
-
 ## 🔍 How it Works
 
-The tool uses **Perceptual Hashing (pHash)** to create a 64-bit fingerprint of each image. Unlike standard file hashes (like MD5), perceptual hashes are:
-1. **Resilient**: They stay the same if the image is resized or saved in a different format.
-2. **Comparable**: You can measure the "distance" between two hashes to see how visually similar two images are.
+The tool uses a multi-stage analysis:
+1. **MD5 Pass**: Instantly groups exact byte-for-byte duplicates.
+2. **Perceptual Pass**: For unique images, it uses **Perceptual Hashing (pHash)** to create a visual fingerprint.
+3. **Comparison**: Measures the "Hamming distance" between fingerprints to find visual matches.
 
 ### Understanding the Similarity Score
-- **100%**: The images are structurally identical.
-- **90%+**: Extremely similar, likely the same photo with different compression or tiny edits.
-- **80%+**: Likely "burst" photos or photos of the same subject from a slightly different angle.
+- **100%**: The images are structurally identical (even if file formats differ).
+- **90%+**: Extremely similar, likely the same photo with different compression.
+- **80%+**: Likely "burst" photos or similar shots of the same subject.
 
 ## 📦 Requirements
 - Python 3.7+
-- `Pillow` (Image processing)
-- `ImageHash` (Perceptual hashing)
-- `rich` (Terminal styling)
+- `Pillow`
+- `ImageHash`
+- `rich`
